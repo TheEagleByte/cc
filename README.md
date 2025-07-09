@@ -49,16 +49,27 @@ npm install -g @anthropic-ai/claude-code
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
 ```
 
-4. [GitHub CLI](https://github.com/cli/cli/blob/trunk/docs/install_linux.md):
+4. [Homebrew](https://brew.sh/):
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+echo >> ~/.bashrc
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+```
+
+5. [GitHub CLI](https://github.com/cli/cli/blob/trunk/docs/install_linux.md):
 
 ```bash
 brew install gh
 gh auth login
 ```
 
-5. [GitLab CLI](https://gitlab.com/gitlab-org/cli):
+6. [GitLab CLI](https://gitlab.com/gitlab-org/cli):
 
 ```bash
 brew install glab
