@@ -25,6 +25,8 @@
       "Bash(for:*)",
       "Bash(do echo \"=== $file ===\")",
       "Bash(done)",
+      "Bash(echo:*)",
+      "Bash(mkdir:*)",
 
       // Git commands
       "Bash(git add:*)",
@@ -36,6 +38,22 @@
       "Bash(yarn test)",
       "Bash(yarn start)",
       "Bash(yarn run:*)",
+
+      // NPM commands
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run test)",
+      "Bash(npm run start)",
+      "Bash(npm run:*)",
+
+      // PNPM commands
+      "Bash(pnpm run build)",
+      "Bash(pnpm run lint)",
+      "Bash(pnpm run lint:*)",
+      "Bash(pnpm run test)",
+      "Bash(pnpm run start)",
+      "Bash(pnpm run:*)",
 
       // Dotnet commands
       "Bash(dotnet build)",

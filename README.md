@@ -81,3 +81,9 @@ glab auth login
 - [Figma](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Dev-Mode-MCP-Server)
 - [Atlassian](https://community.atlassian.com/forums/Atlassian-Platform-articles/Using-the-Atlassian-Remote-MCP-Server-beta/ba-p/3005104)
 - [Supabase](https://github.com/supabase-community/supabase-mcp)
+
+## Calculating CC Usage
+
+```bash
+npx ccusage@latest
+```
