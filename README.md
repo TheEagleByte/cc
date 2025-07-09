@@ -87,3 +87,13 @@ glab auth login
 ```bash
 npx ccusage@latest
 ```
+
+## When using git within WSL
+
+When editing files in WSL, you may want to set the `core.autocrlf` setting to `true` to ensure that line endings are handled correctly between Windows and Linux environments. This setting will convert LF line endings to CRLF on checkout and back to LF on commit.
+
+This is particularly useful if you are working with files that will be used in both environments.
+
+```bash
+git config --global core.autocrlf true
+```
