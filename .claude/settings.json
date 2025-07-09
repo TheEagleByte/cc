@@ -1,0 +1,55 @@
+{
+  "enabledMcpjsonServers": [
+    "playwright",
+    "context7",
+    "sequential-thinking",
+    "basic-memory"
+  ],
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      // MCP Server Commands
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__fetch__fetch",
+      
+      // Bash commands
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(rg:*)",
+      "Bash(sed:*)",
+      "Bash(tail:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(done)",
+
+      // Git commands
+      "Bash(git add:*)",
+
+      // Yarn commands
+      "Bash(yarn build)",
+      "Bash(yarn lint)",
+      "Bash(yarn lint:*)",
+      "Bash(yarn test)",
+      "Bash(yarn start)",
+      "Bash(yarn run:*)",
+
+      // Dotnet commands
+      "Bash(dotnet build)",
+      "Bash(dotnet restore)",
+      "Bash(dotnet clean)",
+      "Bash(dotnet test)",
+
+      // GH CLI commands
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checkout:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh api:*)"
+    ],
+    "deny": []
+  }
+}
