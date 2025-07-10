@@ -34,13 +34,21 @@ This setup enables Claude Code to send notifications to Slack when it needs your
 
 ### 4. Set Environment Variables
 
-Add to your `.env` file or shell environment:
+For WSL, add these to your `~/.bashrc` or `~/.zshrc` file so they're set every time you launch WSL:
 
 ```bash
+# Claude Code Slack Integration
 export SLACK_BOT_TOKEN="xoxb-your-token-here"
 export SLACK_CHANNEL="claude-code"  # or your preferred channel
 export ENGINEER_NAME="Your Name"    # Optional: for personalized messages
 ```
+
+After adding these lines, reload your shell configuration:
+```bash
+source ~/.bashrc  # or source ~/.zshrc if using zsh
+```
+
+Alternatively, you can add them to `/etc/environment` for system-wide availability in WSL.
 
 ### 5. Add Bot to Channel
 

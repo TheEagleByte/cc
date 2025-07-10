@@ -11,10 +11,10 @@ cp -r .claude/* ~/.claude/
 cp .mcp.json ~/.mcp.json
 
 # If you don't use gitlab, remove those commands
-rm ~/.claude/commands/gitlab
+rm -rf ~/.claude/commands/gitlab
 
 # If you don't use github, remove those commands
-rm ~/.claude/commands/github
+rm -rf ~/.claude/commands/github
 ```
 
 ## Dependencies
