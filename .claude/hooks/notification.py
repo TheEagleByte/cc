@@ -85,7 +85,7 @@ def main():
     try:
         # Parse command line arguments
         parser = argparse.ArgumentParser()
-        parser.add_argument('--notify', action='store_true', help='Enable TTS notifications')
+        parser.add_argument('--notify', action='store_true', help='Enable Slack notifications')
         args = parser.parse_args()
         
         # Read JSON input from stdin
@@ -93,7 +93,7 @@ def main():
         
         # Ensure log directory exists
         import os
-        log_dir = os.path.join(os.getcwd(), 'logs')
+        log_dir = os.path.expanduser('~/.claude/hooks/logs')
         os.makedirs(log_dir, exist_ok=True)
         log_file = os.path.join(log_dir, 'notification.json')
         

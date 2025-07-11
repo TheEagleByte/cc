@@ -13,7 +13,7 @@ def main():
         input_data = json.load(sys.stdin)
         
         # Ensure log directory exists
-        log_dir = Path.cwd() / 'logs'
+        log_dir = Path.home() / '.claude' / 'hooks' / 'logs'
         log_dir.mkdir(parents=True, exist_ok=True)
         log_path = log_dir / 'post_tool_use.json'
         

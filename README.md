@@ -8,7 +8,7 @@ The following copies the claude commands/configuration from this repo to your us
 
 ```bash
 cp -r .claude/* ~/.claude/
-cp .mcp.json ~/.mcp.json
+cp .mcp.json ~/.claude/.mcp.json
 
 # If you don't use gitlab, remove those commands
 rm -rf ~/.claude/commands/gitlab
