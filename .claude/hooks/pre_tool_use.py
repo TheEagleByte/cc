@@ -1,12 +1,30 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.8"
+# dependencies = [
+#     "python-dotenv",
+#     "requests",
+# ]
 # ///
 
 import json
 import sys
 import re
+import os
+import time
+import subprocess
 from pathlib import Path
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+try:
+    import requests
+except ImportError:
+    requests = None
 
 def is_dangerous_rm_command(command):
     """
@@ -81,6 +99,148 @@ def is_env_file_access(tool_name, tool_input):
     
     return False
 
+def requires_approval(tool_name):
+    """
+    Check if a tool requires Slack approval based on sensitivity.
+    """
+    # Tools that modify files require approval
+    sensitive_tools = ['Write', 'Edit', 'MultiEdit']
+    return tool_name in sensitive_tools
+
+def send_slack_approval(input_data):
+    """
+    Send approval request to Slack and wait for response.
+    Returns True if approved, False if denied.
+    """
+    if not requests:
+        # Requests not available, auto-approve
+        return True
+    
+    # Get Slack configuration
+    slack_token = os.getenv('SLACK_BOT_TOKEN')
+    slack_channel = os.getenv('SLACK_CHANNEL', 'claude-code')
+    
+    if not slack_token:
+        # No Slack token, auto-approve
+        return True
+    
+    try:
+        session_id = input_data.get('session_id', 'unknown')
+        tool_name = input_data.get('tool_name', 'unknown')
+        tool_input = input_data.get('tool_input', {})
+        
+        # Create approval directory if it doesn't exist
+        approval_dir = Path('/tmp/claude-approvals')
+        approval_dir.mkdir(exist_ok=True)
+        approval_file = approval_dir / f'{session_id}.json'
+        
+        # Remove any existing approval file
+        if approval_file.exists():
+            approval_file.unlink()
+        
+        # Format the message based on tool type
+        if tool_name in ['Write', 'Edit', 'MultiEdit']:
+            file_path = tool_input.get('file_path', 'unknown')
+            message_text = f"🚨 Approval Required: `{tool_name}`"
+            
+            if tool_name == 'Write':
+                content_preview = tool_input.get('content', '')[:200]
+                if len(tool_input.get('content', '')) > 200:
+                    content_preview += '...'
+                detail_text = f"*File:* `{file_path}`\\n*Content Preview:*\\n```{content_preview}```"
+            elif tool_name == 'Edit':
+                old_string = tool_input.get('old_string', '')[:100]
+                new_string = tool_input.get('new_string', '')[:100]
+                detail_text = f"*File:* `{file_path}`\\n*Replace:*\\n```{old_string}```\\n*With:*\\n```{new_string}```"
+            else:  # MultiEdit
+                edits = tool_input.get('edits', [])
+                detail_text = f"*File:* `{file_path}`\\n*Number of edits:* {len(edits)}"
+        else:
+            message_text = f"🚨 Approval Required: `{tool_name}`"
+            detail_text = f"*Details:*\\n```json\\n{json.dumps(tool_input, indent=2)[:500]}```"
+        
+        # Prepare the value for button callbacks
+        callback_value = json.dumps({
+            'session_id': session_id,
+            'tool_name': tool_name,
+            'file_path': tool_input.get('file_path', 'N/A')
+        })
+        
+        # Send approval request to Slack
+        response = requests.post(
+            'https://slack.com/api/chat.postMessage',
+            headers={
+                'Authorization': f'Bearer {slack_token}',
+                'Content-Type': 'application/json'
+            },
+            json={
+                'channel': slack_channel,
+                'text': message_text,
+                'blocks': [
+                    {
+                        'type': 'section',
+                        'text': {
+                            'type': 'mrkdwn',
+                            'text': f"{message_text}\\n{detail_text}"
+                        }
+                    },
+                    {
+                        'type': 'actions',
+                        'elements': [
+                            {
+                                'type': 'button',
+                                'text': {
+                                    'type': 'plain_text',
+                                    'text': '✅ Approve'
+                                },
+                                'style': 'primary',
+                                'value': callback_value,
+                                'action_id': 'approve_command'
+                            },
+                            {
+                                'type': 'button',
+                                'text': {
+                                    'type': 'plain_text',
+                                    'text': '❌ Deny'
+                                },
+                                'style': 'danger',
+                                'value': callback_value,
+                                'action_id': 'deny_command'
+                            }
+                        ]
+                    }
+                ]
+            },
+            timeout=5
+        )
+        
+        # Wait for approval file (up to 60 seconds)
+        timeout = 60
+        elapsed = 0
+        
+        while elapsed < timeout:
+            if approval_file.exists():
+                # Read the approval decision
+                with open(approval_file, 'r') as f:
+                    result = json.load(f)
+                
+                # Clean up the file
+                approval_file.unlink()
+                
+                # Return True if approved, False otherwise
+                return result.get('decision') == 'approve'
+            
+            time.sleep(1)
+            elapsed += 1
+        
+        # Timeout - deny by default
+        return False
+        
+    except Exception as e:
+        # On error, be conservative and deny
+        print(f"Error in Slack approval: {str(e)}", file=sys.stderr)
+        return False
+
 def main():
     try:
         # Read JSON input from stdin
@@ -94,6 +254,12 @@ def main():
             print("BLOCKED: Access to .env files containing sensitive data is prohibited", file=sys.stderr)
             print("Use .env.sample for template files instead", file=sys.stderr)
             sys.exit(2)  # Exit code 2 blocks tool call and shows error to Claude
+        
+        # Check if tool requires approval
+        if requires_approval(tool_name):
+            if not send_slack_approval(input_data):
+                print("BLOCKED: Operation denied via Slack approval", file=sys.stderr)
+                sys.exit(2)  # Exit code 2 blocks tool call and shows error to Claude
         
         # Check for dangerous rm -rf commands
         if tool_name == 'Bash':
